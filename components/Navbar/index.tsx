@@ -1,119 +1,92 @@
-import { useSession } from 'next-auth/react'
-import Image from 'next/image'
-import React, { useState } from 'react'
-import { BsFillPersonFill } from 'react-icons/bs'
-import { useWindowSize } from '../../hooks'
-import LogoImage from '../../public/assets/images/logo.png'
-import { WindowSize } from '../../types'
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import React, { useState } from "react";
+import { BsFillPersonFill } from "react-icons/bs";
+import { useWindowSize } from "../../hooks";
+import LogoImage from "../../public/assets/images/logo.png";
+import { WindowSize } from "../../types";
 import {
-    CloseButtonContainer,
-    CloseIcon,
-    LogoContainer,
-    MenuIcon,
-    MenuLinkContainer,
-    Nav,
-    NavLinkContainer,
-    OverlayMenu
-} from './NavElements'
+  CloseButtonContainer,
+  CloseIcon,
+  LogoContainer,
+  MenuIcon,
+  MenuLinkContainer,
+  Nav,
+  NavLinkContainer,
+  OverlayMenu,
+} from "./NavElements";
 
-import NavLink from './NavLink'
+import NavLink from "./NavLink";
+import { jwtDecode } from "jwt-decode";
 
 const Navbar = () => {
+  const size: WindowSize = useWindowSize();
+  const [showMenu, setShowMenu] = useState(false);
+  const { data: session }: any = useSession();
 
-    const size: WindowSize = useWindowSize()
-    const [showMenu, setShowMenu] = useState(false)
-    const { data: session } = useSession()
+  // lấy ra giá trị của session
+  console.log(session);
 
-    const openMenu = () => {
-        setShowMenu(true)
-    }
+  // sử dụng jwt-decode để giải mã session
+  if (session) {
+    const decodedToken = jwtDecode(session.id_token);
+    console.log(decodedToken);
+  }
 
-    const closeMenu = () => {
-        setShowMenu(false)
-    }
+  const openMenu = () => {
+    setShowMenu(true);
+  };
 
-    return (
-        <Nav>
-            <LogoContainer>
-                <NavLink route="/">
-                    <Image
-                        src={LogoImage}
-                        alt="logo"
-                        width={50}
-                        height={50}
-                    />
-                </NavLink>
-            </LogoContainer>
+  const closeMenu = () => {
+    setShowMenu(false);
+  };
 
-            <NavLinkContainer>
-                {
-                    size.width > 768 ?
-                        <>
-                            <NavLink route="/">
-                                Home
-                            </NavLink>
-                            <NavLink route="/products">
-                                Products
-                            </NavLink>
-                            {
-                                session ?
-                                    <NavLink route="/profile">
-                                        <BsFillPersonFill size={30} />
-                                    </NavLink>
-                                    :
-                                    <NavLink route="/login">
-                                        Login
-                                    </NavLink>
-                            }
-                        </>
-                        :
-                        <MenuIcon
-                            size={30}
-                            onClick={openMenu}
-                        />
-                }
-            </NavLinkContainer>
+  return (
+    <Nav>
+      <LogoContainer>
+        <NavLink route="/">
+          <Image src={LogoImage} alt="logo" width={50} height={50} />
+        </NavLink>
+      </LogoContainer>
 
-            {
-                showMenu &&
-                <OverlayMenu>
-                    <CloseButtonContainer>
-                        <CloseIcon
-                            size={40}
-                            color={'white'}
-                            onClick={closeMenu}
-                        />
-                    </CloseButtonContainer>
-                    <MenuLinkContainer>
-                        <NavLink
-                            route="/"
-                            large
-                            color='white'
-                            onClick={closeMenu}
-                        >
-                            Home
-                        </NavLink>
-                        <NavLink
-                            route="/products"
-                            large
-                            color='white'
-                            onClick={closeMenu}
-                        >
-                            Products
-                        </NavLink>
-                        <NavLink
-                            route="/login"
-                            large
-                            color='white'
-                            onClick={closeMenu}
-                        >
-                            Login
-                        </NavLink>
-                    </MenuLinkContainer>
-                </OverlayMenu>
-            }
-        </Nav>
-    )
-}
+      <NavLinkContainer>
+        {size.width > 768 ? (
+          <>
+            <NavLink route="/">Home</NavLink>
+            <NavLink route="/products">Products</NavLink>
+            {session ? (
+              <NavLink route="/profile">
+                <BsFillPersonFill size={30} />
+              </NavLink>
+            ) : (
+              <NavLink route="/login">Login</NavLink>
+            )}
+          </>
+        ) : (
+          <MenuIcon size={30} onClick={openMenu} />
+        )}
+      </NavLinkContainer>
 
-export default Navbar
+      {showMenu && (
+        <OverlayMenu>
+          <CloseButtonContainer>
+            <CloseIcon size={40} color={"white"} onClick={closeMenu} />
+          </CloseButtonContainer>
+          <MenuLinkContainer>
+            <NavLink route="/" large color="white" onClick={closeMenu}>
+              Home
+            </NavLink>
+            <NavLink route="/products" large color="white" onClick={closeMenu}>
+              Products
+            </NavLink>
+            <NavLink route="/login" large color="white" onClick={closeMenu}>
+              Login
+            </NavLink>
+          </MenuLinkContainer>
+        </OverlayMenu>
+      )}
+    </Nav>
+  );
+};
+
+export default Navbar;

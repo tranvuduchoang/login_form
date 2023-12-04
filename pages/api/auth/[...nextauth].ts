@@ -1,22 +1,31 @@
-import NextAuth, { NextAuthOptions } from 'next-auth'
-import GoogleProvider from 'next-auth/providers/google'
-
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env
-
-if (!GOOGLE_CLIENT_ID)
-    throw new Error("Invalid env variable: GOOGLE_CLIENT_ID")
-
-if (!GOOGLE_CLIENT_SECRET)
-    throw new Error("Invalid env variable: GOOGLE_CLIENT_SECRET")
-
+import NextAuth, { NextAuthOptions } from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
 
 const options: NextAuthOptions = {
-    providers: [
-        GoogleProvider({
-            clientId: GOOGLE_CLIENT_ID,
-            clientSecret: GOOGLE_CLIENT_SECRET
-        })
-    ]
-}
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      scope: [
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+      ],
+    } as any),
+  ],
+  callbacks: {
+    async jwt(params) {
+      const { token, account } = params;
+      if (account) {
+        token.id_token = account.id_token;
+      }
+      return token;
+    },
+    async session(params) {
+      const { session, token } = params;
+      (session as any).id_token = token.id_token;
+      return session;
+    },
+  },
+};
 
-export default NextAuth(options)
+export default NextAuth(options);
